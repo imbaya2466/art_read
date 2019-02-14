@@ -54,6 +54,7 @@ VdexFile::Header::Header(uint32_t number_of_dex_files,
   DCHECK(IsVersionValid());
 }
 
+//参数：vdex路径、false、false、false、错误
 std::unique_ptr<VdexFile> VdexFile::Open(const std::string& vdex_filename,
                                          bool writable,
                                          bool low_4gb,
@@ -68,6 +69,7 @@ std::unique_ptr<VdexFile> VdexFile::Open(const std::string& vdex_filename,
   if (writable) {
     vdex_file.reset(OS::OpenFileReadWrite(vdex_filename.c_str()));
   } else {
+  	//打开文件
     vdex_file.reset(OS::OpenFileForReading(vdex_filename.c_str()));
   }
   if (vdex_file == nullptr) {
@@ -82,9 +84,12 @@ std::unique_ptr<VdexFile> VdexFile::Open(const std::string& vdex_filename,
     return nullptr;
   }
 
+//读取文件到内存
+//参数：fd、文件大小、vdex名、false、false、false、错误
   return Open(vdex_file->Fd(), vdex_length, vdex_filename, writable, low_4gb, unquicken, error_msg);
 }
 
+////参数：fd、文件大小、vdex名、false、false、false、错误
 std::unique_ptr<VdexFile> VdexFile::Open(int file_fd,
                                          size_t vdex_length,
                                          const std::string& vdex_filename,
@@ -92,6 +97,7 @@ std::unique_ptr<VdexFile> VdexFile::Open(int file_fd,
                                          bool low_4gb,
                                          bool unquicken,
                                          std::string* error_msg) {
+  //还是那个mapfile，到内存
   std::unique_ptr<MemMap> mmap(MemMap::MapFile(
       vdex_length,
       (writable || unquicken) ? PROT_READ | PROT_WRITE : PROT_READ,
@@ -106,7 +112,9 @@ std::unique_ptr<VdexFile> VdexFile::Open(int file_fd,
     return nullptr;
   }
 
+//构建VdexFile，只构造了map
   std::unique_ptr<VdexFile> vdex(new VdexFile(mmap.release()));
+  //校验了以下魔数与版本
   if (!vdex->IsValid()) {
     *error_msg = "Vdex file is not valid";
     return nullptr;

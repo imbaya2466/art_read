@@ -149,6 +149,7 @@ class OatFileBase : public OatFile {
 };
 
 template <typename kOatFileBaseSubType>
+////参数：vdex名、odex文件名、odex文件名、null、null、false、bool、false、dex名、错误
 OatFileBase* OatFileBase::OpenOatFile(const std::string& vdex_filename,
                                       const std::string& elf_filename,
                                       const std::string& location,
@@ -159,14 +160,18 @@ OatFileBase* OatFileBase::OpenOatFile(const std::string& vdex_filename,
                                       bool low_4gb,
                                       const char* abs_dex_location,
                                       std::string* error_msg) {
+  //构造中只是赋值
   std::unique_ptr<OatFileBase> ret(new kOatFileBaseSubType(location, executable));
 
   ret->PreLoad();
 
+//加载vdex
+//参数：vdex路径、false、false、错误
   if (kIsVdexEnabled && !ret->LoadVdex(vdex_filename, writable, low_4gb, error_msg)) {
     return nullptr;
   }
-
+//加载odex
+//参数：odex文件名、null、fasle、bool、fasle、错误
   if (!ret->Load(elf_filename,
                  oat_file_begin,
                  writable,
@@ -175,7 +180,7 @@ OatFileBase* OatFileBase::OpenOatFile(const std::string& vdex_filename,
                  error_msg)) {
     return nullptr;
   }
-
+//后面将俩个文件内存的信息填OatFile，并联系到一起
   if (!ret->ComputeFields(requested_base, elf_filename, error_msg)) {
     return nullptr;
   }
@@ -189,10 +194,12 @@ OatFileBase* OatFileBase::OpenOatFile(const std::string& vdex_filename,
   return ret.release();
 }
 
+////参数：vdex路径、false、false、错误
 bool OatFileBase::LoadVdex(const std::string& vdex_filename,
                            bool writable,
                            bool low_4gb,
                            std::string* error_msg) {
+  //加载vdex，返回VdexFile指针
   vdex_ = VdexFile::Open(vdex_filename, writable, low_4gb, /* unquicken*/ false, error_msg);
   if (vdex_.get() == nullptr) {
     *error_msg = StringPrintf("Failed to load vdex file '%s' %s",
@@ -693,6 +700,7 @@ void DlOpenOatFile::PreLoad() {
 #endif
 }
 
+//参数：odex文件名、null、fasle、bool、fasle、错误
 bool DlOpenOatFile::Load(const std::string& elf_filename,
                          uint8_t* oat_file_begin,
                          bool writable,
@@ -730,13 +738,15 @@ bool DlOpenOatFile::Load(const std::string& elf_filename,
       return false;
     }
   }
-
+//dlopen打开odex，句柄在dlopen_handle_
+//参数：odex名、null、错误
   bool success = Dlopen(elf_filename, oat_file_begin, error_msg);
   DCHECK(dlopen_handle_ != nullptr || !success);
 
   return success;
 }
 
+//参数：odex名、null、错误
 bool DlOpenOatFile::Dlopen(const std::string& elf_filename,
                            uint8_t* oat_file_begin,
                            std::string* error_msg) {
@@ -1078,6 +1088,7 @@ OatFile* OatFile::Open(const std::string& oat_filename,
 
   // Try dlopen first, as it is required for native debuggability. This will fail fast if dlopen is
   // disabled.
+  //参数：vdex名、odex文件名、odex文件名、null、null、false、bool、false、dex名、错误
   OatFile* with_dlopen = OatFileBase::OpenOatFile<DlOpenOatFile>(vdex_filename,
                                                                  oat_filename,
                                                                  oat_location,
