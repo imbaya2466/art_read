@@ -40,7 +40,13 @@ class DexFile;
 //   ...
 //   DEX[D]
 //
+/*
+vdex包含提取的dex文件，该类将文件映射到内存并提供访问各个部分的工具
+文件格式:
+固定长度头
+输入的dex文件数组
 
+*/
 class VdexFile {
  public:
   struct Header {
@@ -68,10 +74,10 @@ class VdexFile {
     // Last update: Disable in-place vdex update
     static constexpr uint8_t kVdexVersion[] = { '0', '0', '6', '\0' };
 
-    uint8_t magic_[4];
-    uint8_t version_[4];
-    uint32_t number_of_dex_files_;
-    uint32_t dex_size_;
+    uint8_t magic_[4];				//魔数
+    uint8_t version_[4];			//版本
+    uint32_t number_of_dex_files_;	//dex文件的数量
+    uint32_t dex_size_;				//文件大小
     uint32_t verifier_deps_size_;
     uint32_t quickening_info_size_;
 

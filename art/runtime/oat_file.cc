@@ -214,6 +214,7 @@ bool OatFileBase::ComputeFields(uint8_t* requested_base,
                                 const std::string& file_path,
                                 std::string* error_msg) {
   std::string symbol_error_msg;
+  //oatdata位置获取
   begin_ = FindDynamicSymbolAddress("oatdata", &symbol_error_msg);
   if (begin_ == nullptr) {
     *error_msg = StringPrintf("Failed to find oatdata symbol in '%s' %s",
@@ -231,6 +232,7 @@ bool OatFileBase::ComputeFields(uint8_t* requested_base,
         begin_, requested_base);
     return false;
   }
+  //oatlastword位置获取
   end_ = FindDynamicSymbolAddress("oatlastword", &symbol_error_msg);
   if (end_ == nullptr) {
     *error_msg = StringPrintf("Failed to find oatlastword symbol in '%s' %s",

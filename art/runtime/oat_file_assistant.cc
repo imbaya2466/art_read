@@ -1040,7 +1040,7 @@ OatFileAssistant::DexOptNeeded OatFileAssistant::OatFileInfo::GetDexOptNeeded(
   if (Status() == kOatBootImageOutOfDate) {
     return kDex2OatForBootImage;
   }
-
+	//这里会检查dex文件
   if (oat_file_assistant_->HasOriginalDexFiles()) {
     return kDex2OatFromScratch;
   } else {
